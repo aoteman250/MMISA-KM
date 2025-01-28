@@ -197,32 +197,6 @@ def label_smiles(line, max_smi_len=120):
     return X
 
 
-# def build_dataset(dataset, smiles, seq, contact_dir,esm_dir, target_col):
-#     processed = []
-#     for idx in tqdm(range(len(dataset))):
-#         # 分子图
-#         Smiles = dataset.loc[idx, smiles]
-#         Smiles_100 = label_smiles(Smiles, 100)
-#         smiles_graph = smile_to_graph(Smiles)
-#
-#         # 蛋白质图
-#         protein_seq = dataset.loc[idx, seq]
-#         seq_1000 = label_sequence(protein_seq,650)
-#         contact_map_file = os.path.join(contact_dir, f"{idx+1}.npy")
-#         contact_map = np.load(contact_map_file)
-#         protein_graph = target_to_graph(protein_seq, contact_map)
-#
-#         esm_file = os.path.join(esm_dir, f"{idx + 1}.npy")
-#         esm = np.load(esm_file)
-#         esm = torch.tensor(esm )
-#         pooled_vector = torch.mean(esm, dim=0)
-#
-#
-#         # 标签
-#         label = torch.tensor(dataset.loc[idx, target_col], dtype=torch.float)
-#
-#         processed.append([Smiles_100,seq_1000,smiles_graph, protein_graph,pooled_vector, label,])
-#     return processed, dataset
 
 def build_dataset(dataset, smiles, seq,contact_dir, target_col):
     processed = []
@@ -267,7 +241,6 @@ if __name__ == "__main__":
         # 测试集处理
         testing_file = '/data/stu1/saj_pycharm_project/KM/dataset/increased.csv'
         testing_contact_dir = '/data/stu1/saj_pycharm_project/KM/dataset/increased_contact_t12'
-        # testing_esm = '/data/stu1/saj_pycharm_project/PTCA-PLA/Km/dataset/test480'
         output_testing = "dataset/processed/increased.pt"
 
         df_test = pd.read_csv(testing_file, sep=",")
@@ -278,7 +251,6 @@ if __name__ == "__main__":
         # 训练集处理
         training_file = '/data/stu1/saj_pycharm_project/KM/dataset/decreased.csv'
         training_contact_dir = '/data/stu1/saj_pycharm_project/KM/dataset/decreased_contact_t12'
-        # training_esm = '/data/stu1/saj_pycharm_project/PTCA-PLA/Km/dataset/train480'
         output_training = "dataset/processed/decreased.pt"
 
         df_train = pd.read_csv(training_file, sep=",")
@@ -286,16 +258,15 @@ if __name__ == "__main__":
         torch.save(processed_data_train, output_training)
         print(f"Training data processed and saved to {output_training}")
 
-        # 验证集处理
-        # validation_file = '/data/stu1/saj_pycharm_project/KM/dataset/wild-type-like.csv'
-        # validation_contact_dir = '/data/stu1/saj_pycharm_project/KM/dataset/wild-type-like_contact_t12'
-        # # validation_esm = '/data/stu1/saj_pycharm_project/PTCA-PLA/Km/dataset/valid480'
-        # output_validation = "dataset/processed/wild-type-like.pt"
-        #
-        # df_val = pd.read_csv(validation_file, sep=",")
-        # processed_data_val, dataset_val = build_dataset(df_val, "Smiles", "Sequence", validation_contact_dir,"log10_Km")
-        # torch.save(processed_data_val, output_validation)
-        # print(f"Validation data processed and saved to {output_validation}")
+        验证集处理
+        validation_file = '/data/stu1/saj_pycharm_project/KM/dataset/wild-type-like.csv'
+        validation_contact_dir = '/data/stu1/saj_pycharm_project/KM/dataset/wild-type-like_contact_t12'
+        output_validation = "dataset/processed/wild-type-like.pt"
+        
+        df_val = pd.read_csv(validation_file, sep=",")
+        processed_data_val, dataset_val = build_dataset(df_val, "Smiles", "Sequence", validation_contact_dir,"log10_Km")
+        torch.save(processed_data_val, output_validation)
+        print(f"Validation data processed and saved to {output_validation}")
 
 
     except Exception as e:
