@@ -30,13 +30,13 @@ Python 3.9 and packages version:
 
 ### 3.1 **Dataset**
 
-   The PDBbind database contains a set of experimentally validated protein-ligand binding complexes from the Protein Data Bank, where the protein-ligand binding affinities are expressed as -logKi, -logKd, or -logIC50. In this paper, we collect data from PDBbind version 2016 , which consists of the general set, the refined set, and the core 2016 set. To avoid overlap between these datasets, 290 protein-ligand complexes from the core 2016 set were removed from the refined set. Then, the resulting general set contains 9221 complexes, the refined set contains 3685 complexes, and the core 2016 set contains 290 complexes. Then, 1000 complexes in the refined set are randomly selected as the validation set, the remaining complexes are combined with all the complexes in the general set to form the training set, and the core 2016 set is used to be the testing set. As a result, there are 11906 training samples, 1000 validation samples and 290 test samples, where each sample comprises a protein sequence, a ligand SMILES and a protein-ligand binding affinity value.
+  The BRENDA and SABIO-RK databases are two prominent resources for enzyme-related information. We use the dataset collected by MPEK from the BRENDA and SABIO-RK databases as the baseline dataset. To ensure data quality, several rounds of data cleaning were performed and the final dataset contained 24,585 unique $Km$ entries, and then the dataset was divided into training, validation, and testing datasets according to a ratio of 8:1:1. As a result, there were 19668 training samples, 2459 validation samples, and 2458 testing samples. Each sample comprises a protein sequence, a substrate SMILES string, and a $Km$ value. We set the lengths of protein sequences and SMILES strings to be 500 and 100, respectively. Sequences with a longer length were truncated, and sequences with a shorter length were padded with zeros to reach the fixed length. 
 
 ### 3.2 **Model**
-   -  The overall architectures of PLMAM-PLA is presented in the following figure, which consists of a feature extraction module, a feature enhancement module, a feature fusion module and an output module.
+   -  The overall architectures of MMISA-KM is presented in the following figure, which consists of a feature extraction module, a feature fusion module and an output module.
    -  ![Model Architecture](https://github.com/aoteman250/PLMAM-PLA/blob/main/PLMAM-PLA.jpg)
-   -  trained_model.pt is the PLMAM-PLA model that is trained on the training subest of the PDBbind dataset.
-   -  The ESM-2 model is available at (https://github.com/facebookresearch/esm) and Molformer model is available at (https://huggingface.co/ibm/MoLFormer-XL-both-10pct).
+   -  trained_model.pt is the PLMAM-PLA model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
+   -  The ESM-2 model is available at (https://github.com/facebookresearch/esm).
    -   To load the model from Huggingface, we can use the following code:
 ```python
 import torch
