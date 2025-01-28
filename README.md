@@ -35,9 +35,8 @@ Python 3.9 and packages version:
 ### 3.2 **Model**
    -  The overall architectures of MMISA-KM is presented in the following figure, which consists of a feature extraction module, a feature fusion module and an output module.
    -  ![Model Architecture](https://github.com/aoteman250/MMISA-KM/blob/main/MMISA-KM.jpg)
-   -  trained_model.pt is the PLMAM-PLA model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
    -  The ESM-2 model is available at (https://github.com/facebookresearch/esm).
-   -   To load the model from Huggingface, we can use the following code:
+   -  To load the model from Huggingface, we can use the following code:
 ```python
 import torch
 from transformers import AutoModel, AutoTokenizer
