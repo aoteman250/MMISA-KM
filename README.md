@@ -59,5 +59,6 @@ outputs.pooler_output
    -   To train the model, we can run `main.py` script using the train and valid dataset.
    -   We can also run `test.py` to test the model.
    - `data_process.py` is the data preparation phase.
+   - `utils1.py` is the model preparation phase.
    -  trained_model.pt is the MMISA-KM model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
    - `model.py` implements the MMISA-KM which consists of a feature extraction module, a feature fusion module and an output module.
