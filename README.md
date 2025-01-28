@@ -10,7 +10,7 @@
 ---
 ## 1. Introduction
 
-We proposed MMISA-KM, a novel deep learning model designed to predict the Michaelis constant ($K_{m}$) using protein sequences, protein graphs, substrate SMILES strings, and molecular graphs. MMISA-KM consists of feature extraction, feature fusion, and output modules. The feature extraction module employs convolutional neural networks (CNNs) and graph neural networks (GNNs) to extract both sequence-based and graph-based features from proteins and substrates. The feature fusion module integrates these features using self-attention mechanisms, while the output module utilizes a multi-layer perceptron (MLP) to generate $K_{m}$ predictions. MMISA-KM was trained and evaluated on BRENDA and SABIO-RK dataset, demonstrating superior performance compared to existing state-of-the-art models and variant models.
+We proposed MMISA-KM, a novel deep learning model designed to predict the Michaelis constant ($K_{m}$) using protein sequences, protein graphs, substrate SMILES strings, and molecule graphs. MMISA-KM consists of feature extraction, feature fusion, and output modules. The feature extraction module employs convolutional neural networks (CNNs) and graph neural networks (GNNs) to extract both sequence-based and graph-based features from proteins and substrates. The feature fusion module integrates these features using self-attention mechanisms, while the output module utilizes a multi-layer perceptron (MLP) to generate $K_{m}$ predictions. MMISA-KM was trained and evaluated on BRENDA and SABIO-RK dataset, demonstrating superior performance compared to existing state-of-the-art models and variant models.
 
 
 ## 2. Python Environment
