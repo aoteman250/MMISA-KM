@@ -3,7 +3,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from model2 import *
+from model import *
 import os
 import numpy as np
 import torch.utils.data as Data
@@ -20,26 +20,18 @@ model = GNNNet()
 model = model.to(device)
 
 train_set = torch.load("dataset/processed/training.pt")
-# valid_set = torch.load("dataset/processed/validation.pt")
+valid_set = torch.load("dataset/processed/validation.pt")
 test_set = torch.load("dataset/processed/testing.pt")
 
 trainloader = Data.DataLoader(train_set, batch_size=256, shuffle=True,collate_fn=collate)
-# validloader = Data.DataLoader(valid_set, batch_size=128, shuffle=True,collate_fn=collate)
+validloader = Data.DataLoader(valid_set, batch_size=128, shuffle=True,collate_fn=collate)
 testloader = Data.DataLoader(test_set, batch_size=256, shuffle=True,collate_fn=collate)
 
 
 Learning_rate = 1e-4
 train_size = len(test_set )
 optimizer = optim.AdamW(model.parameters(),lr=Learning_rate,weight_decay=1e-4)
-# scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=Learning_rate, max_lr=Learning_rate * 10,
-#                                         cycle_momentum=False,
-#                                         step_size_up=train_size // 128)
-# scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer,T_max=5, eta_min=1e-3)
 loss_function = nn.MSELoss()
-# scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.001,
-#                                             epochs=n_epoch,
-#                                           steps_per_epoch=len(trainloader))
-
 start = datetime.now()
 print('start at ', start)
 
@@ -75,14 +67,14 @@ for epoch in range(n_epoch):
     print(f'Epoch {epoch}, Total Loss: {avg_loss:.3f}')
     print('-------------------------------------------------')
     print('predicting for valid data')
-    G, P = predicting(model, device, testloader)
+    G, P = predicting(model, device, validloader)
     val = get_mse(G, P)
     calculate_metrics(G, P)
     print('valid result:', val, best_mse)
     if val < best_mse:
         best_mse = val
         best_epoch = epoch + 1
-        torch.save(model.state_dict(), 'trained_model2.pt')
+        torch.save(model.state_dict(), 'trained_model.pt')
         print('rmse improved at epoch ', best_epoch, '; best_test_mse', best_mse, )
     else:
         print('No improvement since epoch ', best_epoch, '; best_test_mse', best_mse, )
@@ -93,7 +85,7 @@ for epoch in range(n_epoch):
 print('-------------------------------------------------')
 print('-------------------------------------------------')
 print('TEST')
-model.load_state_dict(torch.load('trained_model2.pt'))
+model.load_state_dict(torch.load('trained_model.pt'))
 G, P = predicting(model, device, testloader)
 calculate_metrics(G, P)
 
