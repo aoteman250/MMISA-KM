@@ -157,20 +157,13 @@ class Selfattention(nn.Module):
 
     def __init__(self, embed_size, head_num, dropout=0.2):
         super(Selfattention, self).__init__()
-
-
-
-
         self.vec_wise_net = MultiHeadAttentionInteract(embed_size=embed_size,
                                                        head_num=head_num,
                                                        dropout=dropout)
-
-
     def forward(self, x):
         """
             x : batch, field_dim, embed_dim
         """
-
         b, f, e = x.shape
         vec_wise_x = self.vec_wise_net(x).reshape(b, f * e)
 
@@ -224,9 +217,6 @@ class GNNNet(torch.nn.Module):
         # self.fc1 = nn.Linear(2 * output_dim, 512)
         self.fc1 = nn.Linear(embed_dim*4, embed_dim*2)
         self.out = nn.Linear(embed_dim*2, self.n_output)
-
-
-
 
         self.feature_interact = Selfattention( embed_size=embed_dim, head_num=8)
         self.norm = nn.LayerNorm(embed_dim)
