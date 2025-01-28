@@ -53,11 +53,11 @@ outputs.pooler_output
 ```
 
 ### 3.3 **dataset**
-   -   .csv file are dataset uesd in our study.
+   -  The .csv files contain the datasets utilized in our study.
    - `contactmap.py` converts protein sequences into protein contactmap.
 ### 3.4 **script**
    -   To train the model, we can run `main.py` script using the train and valid dataset.
    -   We can also run `test.py` to test the model.
-   - `dataset.py` is the data preparation phase.
-   - `cross_attention.py` implements cross attention mechanisms.
-   - `model.py` implements the PLMAM-PLA which consists of a feature extraction module, a feature enhancement module, a feature fusion module and an output module.
+   - `data_process.py` is the data preparation phase.
+   -  trained_model.pt is the MMISA-KM model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
+   - `model.py` implements the MMISA-KM which consists of a feature extraction module, a feature fusion module and an output module.
