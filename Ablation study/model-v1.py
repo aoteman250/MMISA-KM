@@ -204,30 +204,9 @@ class CNNLSTMModel(nn.Module):
     def forward(self, x):
         x = x.transpose(-1, -2)  # tf和torch纬度有点不一样
         x = self.conv1d(x)  # in：bs, dim, window out: bs, lstm_units, window
-
-        # x = self.drop(x)
         x = x.transpose(-1, -2)  # bs, 1, lstm_units
-        # x, (_, _) = self.lstm(x)  # bs, 1, 2*lstm_units
-        # x = self.act(x)
-        # x = self.SELayer(x.transpose(-1, -2))
         x = self.SKConv(x)
-        # x = self.ChannelGate(x)
-        # x = self.SpatialGate(x)
-        # x = self.maxPool(x)  # bs, lstm_units, 1
-        # x = x.squeeze(dim=2)  # bs, 2*lstm_units
-        # x = self.cls(x)
-        # x = self.act(x)
         return x
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -299,18 +278,10 @@ class Selfattention(nn.Module):
         super(Selfattention, self).__init__()
 
 
-        hidden_dim = 1024
 
         self.vec_wise_net = MultiHeadAttentionInteract(embed_size=embed_size,
                                                        head_num=head_num,
                                                        dropout=dropout)
-
-        # self.trans_vec_nn = nn.Sequential(
-        #     nn.LayerNorm(field_dim * embed_size),
-        #     nn.Linear(field_dim * embed_size, hidden_dim),
-        #     nn.ReLU(),
-        #     nn.Linear(hidden_dim, field_dim * embed_size),
-        # )
 
     def forward(self, x):
         """
@@ -350,9 +321,6 @@ class GNNNet(torch.nn.Module):
 
         self.smi_attention_poc = EncoderLayer(256, 256, 0.1, 0.1, 4)  #交叉注意力机制
         self.seq_attention_tdlig = EncoderLayer(256, 256, 0.1, 0.1, 4)
-
-
-
 
 
         print('GNNNet Loaded')
@@ -420,65 +388,7 @@ class GNNNet(torch.nn.Module):
         mol_pair = self.CNNLSTM1(smile_vectors_onehot)
         pro_pair = self.CNNLSTM2(proteinFeature_onehot)
 
-        # drugConv = mol_pair.permute(0, 2, 1)
-        # proteinConv = pro_pair.permute(0, 2, 1)
-        # drug_QKV = drugConv.permute(2, 0, 1)
-        # protein_QKV = proteinConv.permute(2, 0, 1)
-        # drug_att, _ = self.mix_attention_layer(drug_QKV, protein_QKV, protein_QKV)
-        # protein_att, _ = self.mix_attention_layer(protein_QKV, drug_QKV, drug_QKV)
-        # drug_att = drug_att.permute(1, 2, 0)
-        # protein_att = protein_att.permute(1, 2, 0)
-        # drugConv = drugConv * 0.5 + drug_att * 0.5
-        # proteinConv = proteinConv * 0.5 + protein_att * 0.5
-        mol_pair = self.mol_max_pool(mol_pair).squeeze(2)
-        pro_pair = self.pro_max_pool(pro_pair).squeeze(2)
 
-
-
-        # mol_pair = self.onehot_smi_net(smile_vectors_onehot)
-        # pro_pair = self.onehot_prot_net(proteinFeature_onehot)
-
-        # mol_pair = self.CNN1(smile_vectors_onehot)
-        # pro_pair = self.CNN2(proteinFeature_onehot)
-        #
-        # mol1 = mol.transpose(1, 2)
-        # pro1 = pro.transpose(1, 2)
-        # #
-        # mol2,_ = self.lstm1(mol1)
-        # pro2, _ = self.lstm2(pro1)
-        # #
-        # mol_pair = self.smi_attention_poc(mol2,mol2,mol2)
-        # pro_pair = self.seq_attention_tdlig(pro2,pro2,pro2)
-        # #
-        # mol3 = mol2.transpose(1, 2)
-        # pro3 = pro2.transpose(1, 2)
-        #
-        # mol_QKV = mol3.permute(2, 0, 1)
-        # pro_QKV = pro3.permute(2, 0, 1)
-        #
-        # mol_att, _ = self.mix_attention_layer(mol_QKV, pro_QKV, pro_QKV)
-        # pro_att, _ = self.mix_attention_layer(pro_QKV, mol_QKV, mol_QKV)
-        #
-        # mol_att = mol_att.permute(1, 2, 0)
-        # pro_att = pro_att.permute(1, 2, 0)
-        #
-        # mol = mol3 * 0.5 + mol_att * 0.5
-        # pro = pro3 * 0.5 + pro_att * 0.5
-        #
-        # mol_pair = self.mol_max_pool(mol3).squeeze(2)
-        # pro_pair = self.pro_max_pool(pro3).squeeze(2)
-
-        # mol = self.Drug_max_pool(mol).squeeze(2)
-        # pro = self.Protein_max_pool(pro).squeeze(2)
-
-        # mol = self.smi_attention_poc(mol,pro,pro)
-        # pro = self.seq_attention_tdlig(pro,mol,mol)
-        # mol = self.Drug_CNNs(smile_vectors_onehot)
-        # pro = self.Protein_CNNs(proteinFeature_onehot)
-        # pro = Reduce('b c t -> b c', 'max')(pro)
-
-        # compoundFeature_onehot1 = self.onehot_smi_net(smile_vectors_onehot)
-        # proteinFeature_onehot1 = self.onehot_prot_net(proteinFeature_onehot)
 
         # get graph input
         mol_x, mol_edge_index, mol_batch = data_mol.x, data_mol.edge_index, data_mol.batch
@@ -522,13 +432,6 @@ class GNNNet(torch.nn.Module):
         xt = self.dropout(xt)
         xt = self.relu(self.pro_fc_g2(xt))
         xt = self.dropout(xt)
-        # xt = torch.cat((xt1,xt2), 1)
-        # xt = self.pro_fc_g2(xt)
-        # xt = self.dropout(xt)
-
-
-
-
 
 
 
@@ -536,19 +439,6 @@ class GNNNet(torch.nn.Module):
         all_features = self.norm(all_features.permute(0, 2, 1))
         all_features = self.feature_interact(all_features)
 
-        # mpl = Elem_feature_Fusion_D(mol_pair,ECFP)
-
-
-        # ECFP = self.ecfp1(ecfp)
-        # ECFP = self.ecfp2(ECFP)
-
-        #
-        # all_features = torch.cat((mol_pair,pro_pair), 1)
-        # all_features = self.norm(all_features)
-        # add some dense layers
-        # xc = self.fc1(all_features)
-        # xc = self.relu(xc)
-        # xc = self.dropout(xc)
         xc = self.leaky_relu(self.fc1(all_features))
         xc = self.dropout(xc)
         out = self.out(xc)
