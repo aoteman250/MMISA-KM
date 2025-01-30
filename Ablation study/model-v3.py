@@ -68,11 +68,6 @@ class SKConv(nn.Module):
 
 
 
-
-
-
-
-
 class CNNNET(nn.Module):
     def __init__(self, dim=256, lstm_units=256):
         super(CNNNET, self).__init__()
