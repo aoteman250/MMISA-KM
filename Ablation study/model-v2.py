@@ -214,8 +214,6 @@ class GNNNet(torch.nn.Module):
         # self.pro_fc_g2 = torch.nn.Linear(1000, output_dim)
 
 
-
-
         self.relu = nn.ReLU()
         self.leaky_relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
@@ -224,8 +222,6 @@ class GNNNet(torch.nn.Module):
         # self.fc1 = nn.Linear(2 * output_dim, 512)
         self.fc1 = nn.Linear(embed_dim*3, embed_dim*2)
         self.out = nn.Linear(embed_dim*2, self.n_output)
-
-
 
 
         self.feature_interact = Selfattention(embed_size=embed_dim, head_num=8)
@@ -245,7 +241,6 @@ class GNNNet(torch.nn.Module):
         pro_pair = self.pro_max_pool(pro_pair).squeeze(2)
 
 
-
         # get graph input
         mol_x, mol_edge_index, mol_batch = data_mol.x, data_mol.edge_index, data_mol.batch
         # get protein input
@@ -256,9 +251,7 @@ class GNNNet(torch.nn.Module):
         x = self.dropout(x)
         x = self.mol_conv2(x, mol_edge_index)
         x = self.leaky_relu(x)
-        # x = self.dropout(x)
-        # x = self.mol_conv3(x, mol_edge_index)
-        # x = self.relu(x)
+
 
         x = gmp(x, mol_batch)
 
@@ -278,8 +271,6 @@ class GNNNet(torch.nn.Module):
         all_features = self.norm(all_features.permute(0, 2, 1))
         all_features = self.feature_interact(all_features)
 
-
-        # all_features = torch.cat((mol_pair,pro_pair,x), 1)
 
         xc = self.leaky_relu(self.fc1(all_features))
         xc = self.dropout(xc)
