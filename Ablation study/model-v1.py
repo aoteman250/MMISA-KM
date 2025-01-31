@@ -1,28 +1,8 @@
 
 from torch_geometric.nn import GCNConv, GATConv, global_max_pool as gmp,global_mean_pool as gep,global_sort_pool,LayerNorm,TopKPooling
-from cross_attention import *
-from CBAM import *
 from functools import reduce
 
 
-class SELayer(nn.Module):
-    def __init__(self, channel, reduction=16):
-        super(SELayer, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool1d(1)
-        self.fc = nn.Sequential(
-            nn.Linear(channel, channel // reduction),
-            nn.ReLU(inplace=True),
-            nn.Linear(channel // reduction, channel),
-            nn.Sigmoid()
-        )
-
-    def forward(self, x):
-        b, c, d = x.size()  # 获取输入张量的形状信息
-        y = self.avg_pool(x)  # 应用自适应平均池化到输入张量
-        y = y.view(b, c)  # 将输出视图重新形状以匹配 nn.Linear 的输入要求
-        y = self.fc(y)  # 通过全连接层进行处理
-        y = y.view(b, c, 1)  # 将输出视图重新形状以匹配输入张量的形状
-        return x * y.expand_as(x)  # 将张量乘以得到的权重
 
 
 class SKConv(nn.Module):
@@ -86,94 +66,8 @@ class SKConv(nn.Module):
 
 
 
-class ResDilaCNNBlock(nn.Module):
-    def __init__(self, dilaSize, filterSize=256,  name='ResDilaCNNBlock'):
-        super(ResDilaCNNBlock, self).__init__()
-        self.layers = nn.Sequential(
-            nn.Conv1d(filterSize, filterSize, kernel_size=3, padding=dilaSize, dilation=dilaSize),
-            nn.ReLU(),
-            # nn.Conv1d(filterSize, filterSize, kernel_size=3, padding=dilaSize, dilation=dilaSize),
-            # nn.ReLU(),
-        )
-        self.name = name
-
-    def forward(self, x):
-        # x: batchSize × filterSize × seqLen
-        return self.layers(x)
 
 
-class ResDilaCNNBlocks(nn.Module):
-
-    def __init__(self, feaSize, filterSize, blockNum=3, dilaSizeList=[1, 2, 4], dropout=0.2,
-                 ):
-        super(ResDilaCNNBlocks, self).__init__()  #
-        self.blockLayers = nn.Sequential()
-        self.linear = nn.Linear(feaSize, filterSize)
-        for i in range(blockNum):
-            self.blockLayers.add_module(f"ResDilaCNNBlock{i}",
-                                        ResDilaCNNBlock(dilaSizeList[i % len(dilaSizeList)], filterSize,
-                                                        ))
-        self.act = nn.ReLU()
-
-    def forward(self, x):
-        # x: batchSize × seqLen × feaSize
-        # y = self.linear(x)  # => batchSize × seqLen × filterSize
-        xt = x.transpose(1, 2)
-        y = self.blockLayers(xt)  # => batchSize × seqLen × filterSize
-        # y = self.act(y)  # => batchSize × seqLen × filterSize
-        x = xt+y
-        x = Reduce('b c t -> b c', 'max')(x)
-        return x
-
-
-class CNNNET(nn.Module):
-    def __init__(self, input_channel=256):
-        super(CNNNET, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv1d(in_channels=input_channel, out_channels=input_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(input_channel),
-            nn.GELU())
-        self.conv2_1 = nn.Sequential(
-            nn.Conv1d(in_channels=input_channel, out_channels=input_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(input_channel),
-            nn.GELU(),
-
-)
-        self.conv2_2 = nn.Sequential(
-            nn.Conv1d(in_channels=input_channel, out_channels=input_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(input_channel),
-            nn.GELU(),
-            nn.Dropout(0.2),
-)
-
-
-        self.conv2_3 = nn.Sequential(
-            nn.Conv1d(in_channels=input_channel, out_channels=input_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(input_channel),
-            nn.GELU(),
-            nn.Dropout(0.2),
-)
-
-        self.conv3 = nn.Sequential(
-            nn.Conv1d(in_channels=input_channel*3, out_channels=input_channel, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm1d(input_channel),
-            nn.GELU(),
-            nn.Dropout(0.2),
-        )
-
-
-
-
-    def forward(self, x):
-        x = self.conv1(x.transpose(1, 2))
-        text1 = self.conv2_1(x)
-        text2 = self.conv2_2(x)
-        text3 = self.conv2_3(x)
-        x = torch.cat([text1, text2, text3], dim=1)
-        x = self.conv3(x)
-        x = Reduce('b c t -> b c', 'max')(x)
-
-        return x
 
 
 class CNNLSTMModel(nn.Module):
@@ -184,21 +78,7 @@ class CNNLSTMModel(nn.Module):
             nn.BatchNorm1d(lstm_units),
             nn.LeakyReLU())
 
-
-        self.SELayer = SELayer(512)
         self.SKConv = SKConv(in_channels=dim,out_channels=dim)
-
-
-        self.cross = EncoderLayer(lstm_units , lstm_units , 0.2, 0.2, 4)  #交叉注意力机制
-
-        self.ChannelGate = ChannelGate(gate_channels=128, reduction_ratio=12, pool_types=['avg', 'max'])
-        self.SpatialGate = SpatialGate()
-
-        self.maxPool = nn.MaxPool1d(window)
-        self.drop = nn.Dropout(p=0.2)
-        self.lstm = nn.LSTM(lstm_units, lstm_units, batch_first=True, num_layers=num_layers, bidirectional=False)
-        self.act = nn.LeakyReLU()
-        self.cls = nn.Linear(lstm_units , lstm_units)
 
 
     def forward(self, x):
@@ -303,24 +183,18 @@ class GNNNet(torch.nn.Module):
         self.embed_prot = nn.Embedding(26, embed_dim)
         self.onehot_smi_net = ResDilaCNNBlocks(embed_dim, embed_dim)
         self.onehot_prot_net = ResDilaCNNBlocks(embed_dim, embed_dim)
-        self.CNN1 = CNNNET(input_channel=embed_dim)
-        self.CNN2 = CNNNET(input_channel=embed_dim)
-        # self.lstm1 = nn.LSTM(embed_dim, embed_dim, 4, batch_first=True,bidirectional=True)
-        # self.lstm2 = nn.LSTM(embed_dim, embed_dim, 4, batch_first=True,bidirectional=True)
+
         self.CNNLSTM1 = CNNLSTMModel(window=100, dim=embed_dim, lstm_units=embed_dim, num_layers=4)
         self.CNNLSTM2 = CNNLSTMModel(window=500, dim=embed_dim, lstm_units=embed_dim, num_layers=4)
 
-        self.mix_attention_layer = nn.MultiheadAttention(embed_dim*2, 4)
-        self.linear = nn.Linear(480,128)
+
         self.mol_max_pool = nn.MaxPool1d(100)
         self.pro_max_pool = nn.MaxPool1d(500)
 
-        self.down_sample = nn.Linear(256,128)
 
 
 
-        self.smi_attention_poc = EncoderLayer(256, 256, 0.1, 0.1, 4)  #交叉注意力机制
-        self.seq_attention_tdlig = EncoderLayer(256, 256, 0.1, 0.1, 4)
+
 
 
         print('GNNNet Loaded')
