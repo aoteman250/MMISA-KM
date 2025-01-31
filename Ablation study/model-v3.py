@@ -4,8 +4,6 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv, global_max_pool as gmp,global_mean_pool as gep,global_sort_pool,LayerNorm,TopKPooling
 from torch_geometric.utils import dropout_adj
 from einops.layers.torch import  Reduce
-from cross_attention import *
-from CBAM import *
 from functools import reduce
 
 
@@ -153,13 +151,9 @@ class Selfattention(nn.Module):
     def __init__(self, embed_size, head_num, dropout=0.2):
         super(Selfattention, self).__init__()
 
-
-
-
         self.vec_wise_net = MultiHeadAttentionInteract(embed_size=embed_size,
                                                        head_num=head_num,
                                                        dropout=dropout)
-
 
     def forward(self, x):
         """
