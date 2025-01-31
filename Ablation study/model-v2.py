@@ -4,8 +4,6 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, GATConv, global_max_pool as gmp,global_mean_pool as gep,global_sort_pool,LayerNorm,TopKPooling
 from torch_geometric.utils import dropout_adj
 from einops.layers.torch import  Reduce
-from cross_attention import *
-from CBAM import *
 from functools import reduce
 
 
