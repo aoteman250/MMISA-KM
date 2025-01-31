@@ -64,12 +64,6 @@ class SKConv(nn.Module):
 
 
 
-
-
-
-
-
-
 class CNNLSTMModel(nn.Module):
     def __init__(self, window, dim, lstm_units, num_layers=2):
         super(CNNLSTMModel, self).__init__()
@@ -193,36 +187,6 @@ class GNNNet(torch.nn.Module):
 
 
 
-
-
-
-
-        print('GNNNet Loaded')
-        self.n_output = n_output
-
-        self.mol_conv1 = GATConv(num_features_mol, num_features_mol,heads=8)
-        self.mol_conv2 = GCNConv(num_features_mol * 8, num_features_mol * 8)
-        # self.mol_conv3 = GATConv(num_features_mol* 8, num_features_mol, heads=8,)
-
-        self.mol_fc_g1 = torch.nn.Linear(num_features_mol * 8* 2, 512)
-        self.mol_fc_g2 = torch.nn.Linear(512, 256)
-        # self.mol_fc_g2 = torch.nn.Linear(256, output_dim)
-
-
-        # self.pro_conv1 = GCNConv(embed_dim, embed_dim)
-        self.pro_conv1 = GATConv(num_features_pro, num_features_pro,heads=8)
-        self.pro_conv2 = GCNConv(num_features_pro * 8, num_features_pro * 8)
-        # self.pro_conv3 = GATConv(num_features_pro* 8, num_features_pro, heads=8,)
-
-        # self.pro_conv4 = GCNConv(embed_dim * 4, embed_dim * 8)
-        self.pro_fc_g1 = torch.nn.Linear(num_features_pro*8* 2, 512)
-        self.pro_fc_g2 = torch.nn.Linear(512, 256)
-        # self.pro_fc_g2 = torch.nn.Linear(1000, output_dim)
-
-
-        self.ecfp1 = nn.Linear(1024, 512)
-        self.ecfp2 = nn.Linear(512, 128)
-
         self.relu = nn.ReLU()
         self.leaky_relu = nn.LeakyReLU()
         self.dropout = nn.Dropout(dropout)
@@ -238,19 +202,6 @@ class GNNNet(torch.nn.Module):
         self.feature_interact = Selfattention(field_dim=field_dim, embed_size=proj_dim, head_num=8)
         self.norm = nn.LayerNorm(embed_dim)
 
-    def Elem_feature_Fusion_D(self, xs, x):
-        """The attention mechanism is applied to the last layer of CNN."""
-        x_c = self.down_sample1(torch.cat((xs, x), dim=1))
-        x_c = self.merge_atten(x_c)
-        xs_ = self.leaky_relu(self.W1(xs))
-        x_ = self.leaky_relu(self.W2(x))
-        xs_m = x_c * xs_ + xs
-        ones = torch.ones(x_c.shape)
-        x_m = (ones - x_c) * x_ + x
-        ys = xs_m + x_m
-        return ys
-
-
 
     def forward(self, smile,sequence,data_mol,data_pro):
         # ecfp = ecfp.float()
@@ -261,52 +212,6 @@ class GNNNet(torch.nn.Module):
 
         mol_pair = self.CNNLSTM1(smile_vectors_onehot)
         pro_pair = self.CNNLSTM2(proteinFeature_onehot)
-
-
-
-        # get graph input
-        mol_x, mol_edge_index, mol_batch = data_mol.x, data_mol.edge_index, data_mol.batch
-        # get protein input
-        target_x, target_edge_index, target_batch = data_pro.x, data_pro.edge_index, data_pro.batch
-
-        x = self.mol_conv1(mol_x, mol_edge_index)
-        x = self.relu(x)
-        x = self.mol_conv2(x, mol_edge_index)
-        x = self.relu(x)
-        # x = self.mol_conv3(x, mol_edge_index)
-        # x = self.relu(x)
-
-
-
-        x = torch.cat((gep(x, mol_batch),gmp(x, mol_batch)), 1)
-
-
-        # flatten
-        x = self.relu(self.mol_fc_g1(x))
-        x = self.dropout(x)
-        x = self.relu(self.mol_fc_g2(x))
-        x = self.dropout(x)
-
-        # x = torch.cat((x1,x2), 1)
-        # x = self.mol_fc_g2(x)
-        # x = self.dropout(x)
-        #
-        xt = self.pro_conv1(target_x, target_edge_index)
-        xt = self.relu(xt)
-
-        xt = self.pro_conv2(xt, target_edge_index)
-        xt = self.relu(xt)
-
-
-        xt = torch.cat((gep(xt, target_batch),gmp(xt, target_batch)), 1)
-
-        #
-        # # flatten
-        xt = self.relu(self.pro_fc_g1(xt))
-        xt = self.dropout(xt)
-        xt = self.relu(self.pro_fc_g2(xt))
-        xt = self.dropout(xt)
-
 
 
         all_features = torch.stack([mol_pair,pro_pair], dim=2)
