@@ -61,3 +61,5 @@ outputs.pooler_output
    - `utils1.py` is the model preparation phase.
    -  trained_model.pt is the MMISA-KM model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
    - `model.py` implements the MMISA-KM which consists of a feature extraction module, a feature fusion module and an output module.
+## 4. How to use MMISA-KM?
+1.
