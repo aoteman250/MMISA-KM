@@ -62,4 +62,7 @@ outputs.pooler_output
    -  trained_model.pt is the MMISA-KM model that is trained on the training subest of the BRENDA and SABIO-RK dataset.
    - `model.py` implements the MMISA-KM which consists of a feature extraction module, a feature fusion module and an output module.
 ## 4. How to use MMISA-KM?
-1.
+   -   Firstly, run `contactmap.py` to generate the protein contact map from the enzyme sequence.
+   -   Sceondly, run `data_process.py` to prepare the input data for MMISA-KM, which consists of protein sequences, protein graphs, substrate SMILES strings, and molecular graphs.
+   -   Thirdly, run `main.py` to train our model.
+   -   Lastly, run `test.py` evaluate the model.
